@@ -71,7 +71,8 @@ pub(crate) mod system;
 use crate::{lib::*, tile::Tile};
 pub use layer::LayerKind;
 use layer::{DenseLayer, LayerKindInner, SparseLayer, SpriteLayer};
-pub use raw_tile::RawTile;
+use raw_tile::tiles_to_attributes;
+pub use raw_tile::{RawTile, TileTrait};
 
 /// A type for sprite layers.
 type SpriteLayers = Vec<Option<SpriteLayer>>;
@@ -324,8 +325,7 @@ impl Chunk {
         let mut tile_colors = Vec::new();
         for depth in &self.z_layers {
             for layer in depth.iter().flatten() {
-                let (mut indices, mut colors) =
-                    layer.inner.as_ref().tiles_to_attributes(dimensions);
+                let (mut indices, mut colors) = tiles_to_attributes(&layer.inner, dimensions);
                 tile_indices.append(&mut indices);
                 tile_colors.append(&mut colors);
             }

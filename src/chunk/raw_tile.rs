@@ -1,4 +1,9 @@
-use crate::lib::*;
+use crate::{chunk::LayerKindInner, lib::*};
+
+pub trait TileTrait: 'static {
+    fn get_color(&self) -> &Color;
+    fn get_color_mut(&mut self) -> &mut Color;
+}
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -16,6 +21,16 @@ impl Default for RawTile {
             index: 0,
             color: Color::WHITE,
         }
+    }
+}
+
+impl TileTrait for RawTile {
+    fn get_color(&self) -> &Color {
+        &self.color
+    }
+
+    fn get_color_mut(&mut self) -> &mut Color {
+        &mut self.color
     }
 }
 
@@ -53,4 +68,14 @@ pub(crate) fn sparse_tiles_to_attributes(
         }
     }
     (tile_indexes, tile_colors)
+}
+
+pub(super) fn tiles_to_attributes(
+    layer: &LayerKindInner<RawTile>,
+    dimension: Dimension3,
+) -> (Vec<f32>, Vec<[f32; 4]>) {
+    match layer {
+        LayerKindInner::Dense(l) => dense_tiles_to_attributes(l.tiles()),
+        LayerKindInner::Sparse(l) => sparse_tiles_to_attributes(dimension, l.tiles()),
+    }
 }
