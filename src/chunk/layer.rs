@@ -26,8 +26,8 @@ where
     /// Clears a layer of all sprites.
     fn clear(&mut self);
 
-    // /// Takes all the tiles in the layer and returns attributes for the renderer.
-    //fn tiles_to_attributes(&self, dimension: Dimension3) -> (Vec<f32>, Vec<[f32; 4]>);
+    /// Takes all the tiles in the layer and returns attributes for the renderer.
+    fn tiles_to_attributes(&self, dimension: Dimension3) -> (Vec<f32>, Vec<[f32; 4]>);
 }
 
 /// A layer with dense sprite tiles.
@@ -66,35 +66,27 @@ where
         if let Some(tile) = self.tiles.get_mut(index) {
             if self.tile_count != 0 {
                 self.tile_count -= 1;
-                tile.get_color_mut().set_a(0.0);
+                tile.hide();
             }
         }
     }
 
     fn get_tile(&self, index: usize) -> Option<&T> {
-        self.tiles.get(index).and_then(|tile| {
-            if tile.get_color().a() == 0.0 {
-                None
-            } else {
-                Some(tile)
-            }
-        })
+        self.tiles
+            .get(index)
+            .and_then(|tile| if tile.is_hidden() { None } else { Some(tile) })
     }
 
     fn get_tile_mut(&mut self, index: usize) -> Option<&mut T> {
-        self.tiles.get_mut(index).and_then(|tile| {
-            if tile.get_color().a() == 0.0 {
-                None
-            } else {
-                Some(tile)
-            }
-        })
+        self.tiles
+            .get_mut(index)
+            .and_then(|tile| if tile.is_hidden() { None } else { Some(tile) })
     }
 
     fn get_tile_indices(&self) -> Vec<usize> {
         let mut indices = Vec::with_capacity(self.tiles.len());
         for (index, tile) in self.tiles.iter().enumerate() {
-            if tile.get_color().a() != 0.0 {
+            if !tile.is_hidden() {
                 indices.push(index);
             }
         }
@@ -106,9 +98,9 @@ where
         self.tiles.clear();
     }
 
-    //fn tiles_to_attributes(&self, _dimension: Dimension3) -> (Vec<f32>, Vec<[f32; 4]>) {
-    //crate::chunk::raw_tile::dense_tiles_to_attributes(&self.tiles)
-    //}
+    fn tiles_to_attributes(&self, _dimension: Dimension3) -> (Vec<f32>, Vec<[f32; 4]>) {
+        crate::chunk::raw_tile::dense_tiles_to_attributes(&self.tiles)
+    }
 }
 
 impl<T> DenseLayer<T>
@@ -121,10 +113,6 @@ where
             tiles,
             tile_count: 0,
         }
-    }
-
-    pub fn tiles(&self) -> &[T] {
-        &self.tiles
     }
 }
 
@@ -141,7 +129,7 @@ where
     T: TileTrait,
 {
     fn set_tile(&mut self, index: usize, tile: T) {
-        if tile.get_color().a() == 0.0 {
+        if tile.is_hidden() {
             self.tiles.remove(&index);
         }
         self.tiles.insert(index, tile);
@@ -171,19 +159,15 @@ where
         self.tiles.clear();
     }
 
-    //fn tiles_to_attributes(&self, dimension: Dimension3) -> (Vec<f32>, Vec<[f32; 4]>) {
-    //crate::chunk::raw_tile::sparse_tiles_to_attributes(dimension, &self.tiles)
-    //}
+    fn tiles_to_attributes(&self, dimension: Dimension3) -> (Vec<f32>, Vec<[f32; 4]>) {
+        crate::chunk::raw_tile::sparse_tiles_to_attributes(dimension, &self.tiles)
+    }
 }
 
 impl<T> SparseLayer<T> {
     /// Constructs a new sparse layer with a tile hashmap.
     pub fn new(tiles: HashMap<usize, T>) -> SparseLayer<T> {
         SparseLayer { tiles }
-    }
-
-    pub fn tiles(&self) -> &HashMap<usize, T> {
-        &self.tiles
     }
 }
 

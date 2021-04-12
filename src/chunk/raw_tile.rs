@@ -1,8 +1,10 @@
-use crate::{chunk::LayerKindInner, lib::*};
+use crate::lib::*;
 
 pub trait TileTrait: 'static {
     fn get_color(&self) -> &Color;
-    fn get_color_mut(&mut self) -> &mut Color;
+    fn is_hidden(&self) -> bool;
+    fn hide(&mut self);
+    fn get_index(&self) -> usize;
 }
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -29,30 +31,44 @@ impl TileTrait for RawTile {
         &self.color
     }
 
-    fn get_color_mut(&mut self) -> &mut Color {
-        &mut self.color
+    fn is_hidden(&self) -> bool {
+        self.color.a() == 0.0
+    }
+
+    fn hide(&mut self) {
+        self.color.set_a(0.0);
+    }
+
+    fn get_index(&self) -> usize {
+        self.index
     }
 }
 
 /// A utility function that takes an array of `Tile`s and splits the indexes and
 /// colors and returns them as separate vectors for use in the renderer.
-pub(crate) fn dense_tiles_to_attributes(tiles: &[RawTile]) -> (Vec<f32>, Vec<[f32; 4]>) {
+pub(crate) fn dense_tiles_to_attributes<T>(tiles: &[T]) -> (Vec<f32>, Vec<[f32; 4]>)
+where
+    T: TileTrait,
+{
     let capacity = tiles.len() * 4;
     let mut tile_indexes: Vec<f32> = Vec::with_capacity(capacity);
     let mut tile_colors: Vec<[f32; 4]> = Vec::with_capacity(capacity);
     for tile in tiles.iter() {
-        tile_indexes.extend([tile.index as f32; 4].iter());
-        tile_colors.extend([tile.color.into(); 4].iter());
+        tile_indexes.extend([tile.get_index() as f32; 4].iter());
+        tile_colors.extend([(*tile.get_color()).into(); 4].iter());
     }
     (tile_indexes, tile_colors)
 }
 
 /// A utility function that takes a sparse map of `Tile`s and splits the indexes
 /// and colors and returns them as separate vectors for use in the renderer.
-pub(crate) fn sparse_tiles_to_attributes(
+pub(crate) fn sparse_tiles_to_attributes<T>(
     dimension: Dimension3,
-    tiles: &HashMap<usize, RawTile>,
-) -> (Vec<f32>, Vec<[f32; 4]>) {
+    tiles: &HashMap<usize, T>,
+) -> (Vec<f32>, Vec<[f32; 4]>)
+where
+    T: TileTrait,
+{
     let area = (dimension.width * dimension.height) as usize;
     let mut tile_indexes = vec![0.; area * 4];
     // If tiles are set with an alpha of 0, they are discarded.
@@ -60,22 +76,12 @@ pub(crate) fn sparse_tiles_to_attributes(
     for (index, tile) in tiles.iter() {
         for i in 0..4 {
             if let Some(index) = tile_indexes.get_mut(index * 4 + i) {
-                *index = tile.index as f32;
+                *index = tile.get_index() as f32;
             }
             if let Some(index) = tile_colors.get_mut(index * 4 + i) {
-                *index = tile.color.into();
+                *index = (*tile.get_color()).into();
             }
         }
     }
     (tile_indexes, tile_colors)
-}
-
-pub(super) fn tiles_to_attributes(
-    layer: &LayerKindInner<RawTile>,
-    dimension: Dimension3,
-) -> (Vec<f32>, Vec<[f32; 4]>) {
-    match layer {
-        LayerKindInner::Dense(l) => dense_tiles_to_attributes(l.tiles()),
-        LayerKindInner::Sparse(l) => sparse_tiles_to_attributes(dimension, l.tiles()),
-    }
 }
