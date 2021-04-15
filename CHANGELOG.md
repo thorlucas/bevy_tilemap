@@ -32,7 +32,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * Renamed `Tilemap2DPlugin` to `TilemapPlugin` as now the tilemap supports both
 2D and 3D. Lets not get carried away here and go beyond the 3rd dimension!
 * `Chunk` was made private as it never was meant to be public. Oops.
-* Changed `RawTile` to be public. Now you can see raw details of the tiles.
+* Changed `SimpleTile` to be public. Now you can see raw details of the tiles.
 * Made the `TilemapError` inner public.
 * `TilemapBuilder::chunk_dimensions` now requires an extra argument `depth`. You
   probably do not want to set this to 0.
@@ -88,7 +88,7 @@ orientations.
 * `Tilemap::get_tile_mut` method was added to get a mutable reference to a tile.
 This should make it easier to do animations.
 * `Tilemap::tile_to_chunk_point` method is now `point_to_chunk_point`.
-* `tile:RawTile` is now public API but not included in the prelude as it is not
+* `tile:SimpleTile` is now public API but not included in the prelude as it is not
 meant to be constructed.
 * Examples for all tile orientations.
 * Library is able to work with WASM.

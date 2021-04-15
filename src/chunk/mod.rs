@@ -71,7 +71,7 @@ pub(crate) mod system;
 use crate::{lib::*, tile::Tile, Tilemap};
 pub use layer::LayerKind;
 use layer::{DenseLayer, LayerKindInner, SparseLayer, SpriteLayer};
-pub use raw_tile::{RawTile, TileTrait};
+pub use raw_tile::{SimpleTile, TileTrait};
 
 /// A type for sprite layers.
 type SpriteLayers = Vec<Option<SpriteLayer>>;
@@ -129,7 +129,7 @@ impl Chunk {
             match kind {
                 LayerKind::Dense => {
                     let tiles = vec![
-                        RawTile {
+                        SimpleTile {
                             index: 0,
                             color: Color::rgba(0.0, 0.0, 0.0, 0.0)
                         };
@@ -214,7 +214,7 @@ impl Chunk {
     pub(crate) fn set_tile(&mut self, index: usize, tile: Tile<Point3>) {
         if let Some(z_depth) = self.z_layers.get_mut(tile.point.z as usize) {
             if let Some(layer) = z_depth.get_mut(tile.sprite_order) {
-                let raw_tile = RawTile {
+                let raw_tile = SimpleTile {
                     index: tile.sprite_index,
                     color: tile.tint,
                 };
@@ -277,7 +277,7 @@ impl Chunk {
         index: usize,
         sprite_order: usize,
         z_depth: usize,
-    ) -> Option<&RawTile> {
+    ) -> Option<&SimpleTile> {
         self.z_layers.get(z_depth).and_then(|z_depth| {
             z_depth.get(sprite_order).and_then(|layer| {
                 layer
@@ -293,7 +293,7 @@ impl Chunk {
         index: usize,
         sprite_order: usize,
         z_depth: usize,
-    ) -> Option<&mut RawTile> {
+    ) -> Option<&mut SimpleTile> {
         self.z_layers.get_mut(z_depth).and_then(|z_depth| {
             z_depth.get_mut(sprite_order).and_then(|layer| {
                 layer

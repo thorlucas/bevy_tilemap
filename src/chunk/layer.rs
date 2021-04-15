@@ -1,5 +1,5 @@
 use crate::{
-    chunk::{RawTile, TileTrait},
+    chunk::{SimpleTile, TileTrait},
     lib::*,
 };
 
@@ -232,5 +232,5 @@ where
 /// A sprite layer which can either store a sparse or dense layer.
 pub(super) struct SpriteLayer {
     /// Enum storage of the kind of layer.
-    pub inner: LayerKindInner<RawTile>,
+    pub inner: LayerKindInner<SimpleTile>,
 }

@@ -2,31 +2,31 @@ use crate::lib::*;
 
 pub trait TileTrait: 'static {
     fn get_color(&self) -> &Color;
+    fn get_index(&self) -> usize;
     fn is_hidden(&self) -> bool;
     fn hide(&mut self);
-    fn get_index(&self) -> usize;
 }
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Copy, Clone, PartialEq, Debug)]
 /// A raw tile composed of simply an index and a color.
-pub struct RawTile {
+pub struct SimpleTile {
     /// The index of the tile in the sprite sheet.
     pub index: usize,
     /// The color, or tint, of the tile.
     pub color: Color,
 }
 
-impl Default for RawTile {
+impl Default for SimpleTile {
     fn default() -> Self {
-        RawTile {
+        SimpleTile {
             index: 0,
             color: Color::WHITE,
         }
     }
 }
 
-impl TileTrait for RawTile {
+impl TileTrait for SimpleTile {
     fn get_color(&self) -> &Color {
         &self.color
     }

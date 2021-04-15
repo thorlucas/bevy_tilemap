@@ -94,7 +94,7 @@
 //! ```
 
 use crate::{
-    chunk::{mesh::ChunkMesh, Chunk, LayerKind, RawTile},
+    chunk::{mesh::ChunkMesh, Chunk, LayerKind, SimpleTile},
     event::TilemapChunkEvent,
     lib::*,
     prelude::GridTopology,
@@ -1394,7 +1394,7 @@ impl Tilemap {
     /// use bevy_asset::{prelude::*, HandleId};
     /// use bevy_render::prelude::*;
     /// use bevy_sprite::prelude::*;
-    /// use bevy_tilemap::{prelude::*, chunk::RawTile};
+    /// use bevy_tilemap::{prelude::*, chunk::SimpleTile};
     ///
     /// // In production use a strong handle from an actual source.
     /// let texture_atlas_handle = Handle::weak(HandleId::random::<TextureAtlas>());
@@ -1417,9 +1417,9 @@ impl Tilemap {
     /// // Set multiple tiles and unwrap the result
     /// tilemap.insert_tiles(tiles).unwrap();
     ///
-    /// assert_eq!(tilemap.get_tile((1, 1), 0), Some(&RawTile { index: 0, color: Color::WHITE }));
-    /// assert_eq!(tilemap.get_tile((2, 2), 0), Some(&RawTile { index: 1, color: Color::WHITE }));
-    /// assert_eq!(tilemap.get_tile((3, 3), 0), Some(&RawTile { index: 2, color: Color::WHITE }));
+    /// assert_eq!(tilemap.get_tile((1, 1), 0), Some(&SimpleTile { index: 0, color: Color::WHITE }));
+    /// assert_eq!(tilemap.get_tile((2, 2), 0), Some(&SimpleTile { index: 1, color: Color::WHITE }));
+    /// assert_eq!(tilemap.get_tile((3, 3), 0), Some(&SimpleTile { index: 2, color: Color::WHITE }));
     /// assert_eq!(tilemap.get_tile((4, 4), 0), None);
     /// ```
     ///
@@ -1483,7 +1483,7 @@ impl Tilemap {
     /// use bevy_asset::{prelude::*, HandleId};
     /// use bevy_render::prelude::*;
     /// use bevy_sprite::prelude::*;
-    /// use bevy_tilemap::{prelude::*, chunk::RawTile};
+    /// use bevy_tilemap::{prelude::*, chunk::SimpleTile};
     ///
     /// // In production use a strong handle from an actual source.
     /// let texture_atlas_handle = Handle::weak(HandleId::random::<TextureAtlas>());
@@ -1497,7 +1497,7 @@ impl Tilemap {
     /// let tile = Tile { point, sprite_index, ..Default::default() };
     ///
     /// assert!(tilemap.insert_tile(tile).is_ok());
-    /// assert_eq!(tilemap.get_tile((9, 3), 0), Some(&RawTile { index: 3, color: Color::WHITE }))
+    /// assert_eq!(tilemap.get_tile((9, 3), 0), Some(&SimpleTile { index: 3, color: Color::WHITE }))
     /// ```
     ///
     /// # Errors
@@ -1515,7 +1515,7 @@ impl Tilemap {
     /// use bevy_asset::{prelude::*, HandleId};
     /// use bevy_render::prelude::*;
     /// use bevy_sprite::prelude::*;
-    /// use bevy_tilemap::{prelude::*, chunk::RawTile};
+    /// use bevy_tilemap::{prelude::*, chunk::SimpleTile};
     ///
     /// // In production use a strong handle from an actual source.
     /// let texture_atlas_handle = Handle::weak(HandleId::random::<TextureAtlas>());
@@ -1543,7 +1543,7 @@ impl Tilemap {
     /// tilemap.clear_tiles(to_remove).unwrap();
     /// assert_eq!(tilemap.get_tile((1, 1, 0), 0), None);
     /// assert_eq!(tilemap.get_tile((2, 2, 0), 0), None);
-    /// assert_eq!(tilemap.get_tile((3, 3, 0), 0), Some(&RawTile { index: 0, color: Color::WHITE} ));
+    /// assert_eq!(tilemap.get_tile((3, 3, 0), 0), Some(&SimpleTile { index: 0, color: Color::WHITE} ));
     /// ```
     ///
     /// # Errors
@@ -1601,7 +1601,7 @@ impl Tilemap {
     /// ```
     /// use bevy_asset::{prelude::*, HandleId};
     /// use bevy_sprite::prelude::*;
-    /// use bevy_tilemap::{prelude::*, chunk::RawTile};
+    /// use bevy_tilemap::{prelude::*, chunk::SimpleTile};
     ///
     /// // In production use a strong handle from an actual source.
     /// let texture_atlas_handle = Handle::weak(HandleId::random::<TextureAtlas>());
@@ -1646,7 +1646,7 @@ impl Tilemap {
     /// use bevy_asset::{prelude::*, HandleId};
     /// use bevy_render::prelude::*;
     /// use bevy_sprite::prelude::*;
-    /// use bevy_tilemap::{prelude::*, chunk::RawTile};
+    /// use bevy_tilemap::{prelude::*, chunk::SimpleTile};
     ///
     /// // In production use a strong handle from an actual source.
     /// let texture_atlas_handle = Handle::weak(HandleId::random::<TextureAtlas>());
@@ -1660,10 +1660,10 @@ impl Tilemap {
     /// let tile = Tile { point, sprite_index, ..Default::default() };
     ///
     /// assert!(tilemap.insert_tile(tile).is_ok());
-    /// assert_eq!(tilemap.get_tile((9, 3), 0), Some(&RawTile { index: 3, color: Color::WHITE }));
+    /// assert_eq!(tilemap.get_tile((9, 3), 0), Some(&SimpleTile { index: 3, color: Color::WHITE }));
     /// assert_eq!(tilemap.get_tile((10, 4), 0), None);
     /// ```
-    pub fn get_tile<P>(&mut self, point: P, sprite_order: usize) -> Option<&RawTile>
+    pub fn get_tile<P>(&mut self, point: P, sprite_order: usize) -> Option<&SimpleTile>
     where
         P: Into<Point3>,
     {
@@ -1687,7 +1687,7 @@ impl Tilemap {
     /// use bevy_asset::{prelude::*, HandleId};
     /// use bevy_render::prelude::*;
     /// use bevy_sprite::prelude::*;
-    /// use bevy_tilemap::{prelude::*, chunk::RawTile};
+    /// use bevy_tilemap::{prelude::*, chunk::SimpleTile};
     ///
     /// // In production use a strong handle from an actual source.
     /// let texture_atlas_handle = Handle::weak(HandleId::random::<TextureAtlas>());
@@ -1701,10 +1701,10 @@ impl Tilemap {
     /// let tile = Tile { point, sprite_index, ..Default::default() };
     ///
     /// assert!(tilemap.insert_tile(tile).is_ok());
-    /// assert_eq!(tilemap.get_tile_mut((2, 5), 0), Some(&mut RawTile { index: 2, color: Color::WHITE }));
+    /// assert_eq!(tilemap.get_tile_mut((2, 5), 0), Some(&mut SimpleTile { index: 2, color: Color::WHITE }));
     /// assert_eq!(tilemap.get_tile_mut((1, 4), 0), None);
     /// ```
-    pub fn get_tile_mut<P>(&mut self, point: P, sprite_order: usize) -> Option<&mut RawTile>
+    pub fn get_tile_mut<P>(&mut self, point: P, sprite_order: usize) -> Option<&mut SimpleTile>
     where
         P: Into<Point3>,
     {
@@ -1728,7 +1728,7 @@ impl Tilemap {
     /// use bevy_asset::{prelude::*, HandleId};
     /// use bevy_render::prelude::*;
     /// use bevy_sprite::prelude::*;
-    /// use bevy_tilemap::{prelude::*, chunk::RawTile};
+    /// use bevy_tilemap::{prelude::*, chunk::SimpleTile};
     ///
     /// // In production use a strong handle from an actual source.
     /// let texture_atlas_handle = Handle::weak(HandleId::random::<TextureAtlas>());
