@@ -30,7 +30,7 @@ pub(crate) fn chunk_update(
             error!("`Mesh` is missing, can not update chunk");
             return;
         };
-        let (indexes, colors) = chunk.tiles_to_renderer_parts(tilemap.chunk_dimensions());
+        let (indexes, colors) = chunk.tiles_to_renderer_parts(&tilemap, tilemap.chunk_dimensions());
         mesh.set_attribute(ChunkMesh::ATTRIBUTE_TILE_INDEX, indexes);
         mesh.set_attribute(ChunkMesh::ATTRIBUTE_TILE_COLOR, colors);
     }

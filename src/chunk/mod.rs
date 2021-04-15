@@ -68,7 +68,7 @@ pub(crate) mod render;
 /// Systems for chunks.
 pub(crate) mod system;
 
-use crate::{lib::*, tile::Tile};
+use crate::{lib::*, tile::Tile, Tilemap};
 pub use layer::LayerKind;
 use layer::{DenseLayer, LayerKindInner, SparseLayer, SpriteLayer};
 pub use raw_tile::{RawTile, TileTrait};
@@ -318,6 +318,7 @@ impl Chunk {
     /// Easier to pass in the dimensions opposed to storing it everywhere.
     pub(crate) fn tiles_to_renderer_parts(
         &self,
+        map: &Tilemap,
         dimensions: Dimension3,
     ) -> (Vec<f32>, Vec<[f32; 4]>) {
         let mut tile_indices = Vec::new();

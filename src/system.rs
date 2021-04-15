@@ -78,6 +78,20 @@ fn handle_spawned_chunks(
         let pipeline_handle = tilemap.topology().to_pipeline_handle();
         let chunk_mesh = tilemap.chunk_mesh().clone();
         let topology = tilemap.topology();
+
+        // TODO: Ugly code here, we're repeating chunk fetch to get around the borrow checker
+
+        let mut mesh = Mesh::from(&chunk_mesh);
+        let (indexes, colors) = {
+            let chunk = if let Some(chunk) = tilemap.chunks().get(&point) {
+                chunk
+            } else {
+                warn!("Can not get chunk at {}, possible bug report me", &point);
+                continue;
+            };
+            chunk.tiles_to_renderer_parts(tilemap, chunk_dimensions)
+        };
+
         let chunk = if let Some(chunk) = tilemap.chunks_mut().get_mut(&point) {
             chunk
         } else {
@@ -85,8 +99,7 @@ fn handle_spawned_chunks(
             warn!("Can not get chunk at {}, possible bug report me", &point);
             continue;
         };
-        let mut mesh = Mesh::from(&chunk_mesh);
-        let (indexes, colors) = chunk.tiles_to_renderer_parts(chunk_dimensions);
+
         mesh.set_attribute(ChunkMesh::ATTRIBUTE_TILE_INDEX, indexes);
         mesh.set_attribute(ChunkMesh::ATTRIBUTE_TILE_COLOR, colors);
         let mesh_handle = meshes.add(mesh);
@@ -179,6 +192,7 @@ fn handle_despawned_chunks(
 fn recalculate_mesh(
     meshes: &mut Assets<Mesh>,
     mesh: &Handle<Mesh>,
+    tilemap: &Tilemap,
     chunk: &Chunk,
     chunk_mesh: &ChunkMesh,
     chunk_dimensions: Dimension3,
@@ -190,7 +204,7 @@ fn recalculate_mesh(
         }
         Some(m) => m,
     };
-    let (indexes, colors) = chunk.tiles_to_renderer_parts(chunk_dimensions);
+    let (indexes, colors) = chunk.tiles_to_renderer_parts(tilemap, chunk_dimensions);
     mesh.set_indices(Some(Indices::U32(chunk_mesh.indices.clone())));
     mesh.set_attribute(Mesh::ATTRIBUTE_POSITION, chunk_mesh.vertices.clone());
     mesh.set_attribute(ChunkMesh::ATTRIBUTE_TILE_INDEX, indexes);
@@ -205,12 +219,17 @@ fn handle_add_sprite_layers(
 ) {
     let chunk_dimensions = tilemap.chunk_dimensions();
     let chunk_mesh = tilemap.chunk_mesh().clone();
+
+    // TODO: Ugly code here, looping twice to satisfy borrow checker
     for chunk in tilemap.chunks_mut().values_mut() {
         for (kind, sprite_layer) in &add_sprite_layers {
             chunk.add_sprite_layer(&kind, *sprite_layer, chunk_dimensions);
-            if let Some(mesh) = chunk.mesh() {
-                recalculate_mesh(meshes, mesh, chunk, &chunk_mesh, chunk_dimensions);
-            }
+        }
+    }
+
+    for chunk in tilemap.chunks().values() {
+        if let Some(mesh) = chunk.mesh() {
+            recalculate_mesh(meshes, mesh, tilemap, chunk, &chunk_mesh, chunk_dimensions);
         }
     }
 }
@@ -226,9 +245,12 @@ fn handle_remove_sprite_layers(
     for sprite_layer in remove_sprite_layers {
         for chunk in tilemap.chunks_mut().values_mut() {
             chunk.remove_sprite_layer(sprite_layer);
-            if let Some(mesh) = chunk.mesh() {
-                recalculate_mesh(meshes, mesh, chunk, &chunk_mesh, chunk_dimensions);
-            }
+        }
+    }
+
+    for chunk in tilemap.chunks().values() {
+        if let Some(mesh) = chunk.mesh() {
+            recalculate_mesh(meshes, mesh, tilemap, chunk, &chunk_mesh, chunk_dimensions);
         }
     }
 }
